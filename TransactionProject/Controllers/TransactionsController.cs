@@ -5,9 +5,6 @@ using TransactionProject.Domains;
 
 namespace TransactionProject.Controllers
 {
-
-
-
     [ApiController]
     [Route("api/[controller]")]
     public class TransactionsController : ControllerBase
@@ -20,7 +17,6 @@ namespace TransactionProject.Controllers
             _context = context;
             _unitOfWork = unitOfWork;
         }
-
 
 
         #region 001 - بدون Transaction
@@ -58,17 +54,19 @@ namespace TransactionProject.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var user = new User { Name = "John" };
+                var user = new User { Name = userName };
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                var product = new Product { Name = "Laptop", Price = price };
+                var product = new Product { Name = productName, Price = price };
                 if (product.Price <= 0)
                 {
                     throw new Exception("product amount must be greater than zero.");
                 }
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
                 return Ok("Transaction completed successfully.");
             }
             catch (Exception ex)
@@ -79,7 +77,6 @@ namespace TransactionProject.Controllers
 
         }
         #endregion
-
 
         #region 003 با استفاده از Unit Of Work
         [HttpPost]
